@@ -1,23 +1,45 @@
-# Vertical Slices Architecture
-Simple application to see what a vertical slices architecture (VSA) + CQRS + DDD would look like in golang
+# 🧱 Vertical Slice Architecture in Go
 
-## Description
+A simple application demonstrating **one way** to structure a Go project using **Vertical Slice Architecture (VSA)**, along with **CQRS**, **Domain-Driven Design (DDD)** and **Clean Architecture (CA)** principles.
 
-We have products and orders.
+---
 
-When creating an order we need to check if there is enough stock.
-On order creation, the product stock is decremented.
+## 📝 Overview
 
-This project demonstrates how to communicate between the two slices, Order and Products, keeping them decoupled through the use of interfaces and events.
+This project includes two primary domains:
 
-## Style
-Although VSA advocates simplicity, but I still like to separate technology from the domain within a slice, meaning that this project style will always use a controller -> domain (commands/queries + entities) -> persistence separation.
+- **Products**
+- **Orders**
 
-Even if there is separation, for a specific use case, the controller and command/query are in the same file.
+### Order Flow
 
-Regarding repositories, I think the decoupling interfaces here is beneficial to allow faster unit tests.
+When creating an order:
 
-This is what is what the dir structure looks like:
+1. The system checks if there is enough product stock.
+2. If stock is available, the order is created and the stock is decremented.
+
+This showcases how to keep slices decoupled through **interfaces** and **domain events**, allowing clear communication between the `Orders` and `Products` slices.
+
+---
+
+## 🧩 Architecture & Style
+
+Although VSA encourages simplicity, this implementation maintains a clean internal structure by **separating technology concerns from the domain** and a dependency direction as stated by CA, within each slice. The general flow looks like:
+
+`controller → domain (commands/queries + entities) → gateway (persistence)`
+
+
+For individual use cases, the controller and its associated command/query may be placed in the same file for convenience and clarity.
+
+### ✅ Testing & Repositories
+
+Repositories are abstracted behind interfaces to support **fast and isolated unit testing** and promote loose coupling between layers.
+
+---
+
+## 📁 Project Structure
+
+Here's how the internal directory is organized:
 
 ```
 internal
@@ -46,6 +68,31 @@ internal
         └── repository.go
 ```
 
-If a specific data model looks like it will contain logic around it, I would start implementing it as DDD aggregate from the start. Both Order and Product are aggregates. For CRUD operations just use plain struct models. 
 
-I implemented the above order creation validation by using a DDD policy, and this can be argued to be too complex by adding unnecessary indirection, but from my perspective, that little extra complexity allows us to put every piece of logic in the same place, increasing cohesion.
+---
+
+## 🧠 Domain Modeling & DDD
+
+If a data model involves business logic, I would model it as a **DDD aggregate** from the start. In this app, both `Order` and `Product` are aggregates.
+
+For straightforward CRUD operations, I would just use simple struct-based models.
+
+As business logic increases always consider to refactor to an aggregate.
+
+---
+
+## 🔄 Domain Policies
+
+Order creation involves validating available stock, implemented using a **DDD policy**. While this may introduce a bit more abstraction, it allows logic to remain **highly cohesive** and centralized—making it easier to evolve and maintain over time. 
+
+---
+
+## 🚀 Goals
+
+- Showcase how VSA can be applied in Go.
+- Emphasize decoupling, testability, and domain-focused design.
+- Provide a solid base for extending into a more complete microservice or monolith.
+
+---
+
+Feel free to fork or adapt this for your own projects!
