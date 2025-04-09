@@ -6,7 +6,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/orders"
+	"github.com/quintans/vertical-slices/internal/features/orders/domain"
 )
 
 type GetOrderRequest struct {
@@ -47,7 +47,11 @@ func NewGetOrderController(handler GetOrderHandler) (huma.Operation, func(ctx co
 		}
 }
 
-func NewGetOrderHandler(repo orders.Repository) GetOrderHandler {
+type Getter interface {
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.Order, error)
+}
+
+func NewGetOrderHandler(repo Getter) GetOrderHandler {
 	return func(ctx context.Context, id uuid.UUID) (*OrderDTO, error) {
 		product, err := repo.GetByID(ctx, id)
 		if err != nil {

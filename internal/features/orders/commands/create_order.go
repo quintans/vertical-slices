@@ -6,7 +6,6 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/orders"
 	"github.com/quintans/vertical-slices/internal/features/orders/domain"
 )
 
@@ -44,7 +43,11 @@ func NewCreateOrderController(handler CreateOrderHandler) (huma.Operation, func(
 		}
 }
 
-func NewCreateOrderHandler(repo orders.Repository, policy domain.CreateOrderPolicy) CreateOrderHandler {
+type Creater interface {
+	Create(ctx context.Context, product *domain.Order) error
+}
+
+func NewCreateOrderHandler(repo Creater, policy domain.CreateOrderPolicy) CreateOrderHandler {
 	return func(ctx context.Context, cmd *CreateOrderCommand) (uuid.UUID, error) {
 		p, err := domain.NewOrder(ctx, cmd.ProductID, cmd.Quantity, policy)
 		if err != nil {

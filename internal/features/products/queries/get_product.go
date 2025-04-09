@@ -6,7 +6,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/products"
+	"github.com/quintans/vertical-slices/internal/features/products/domain"
 )
 
 type GetProductRequest struct {
@@ -48,7 +48,11 @@ func NewGetProductController(handler GetProductHandler) (huma.Operation, func(ct
 		}
 }
 
-func NewGetProductHandler(repo products.Repository) GetProductHandler {
+type Getter interface {
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.Product, error)
+}
+
+func NewGetProductHandler(repo Getter) GetProductHandler {
 	return func(ctx context.Context, id uuid.UUID) (*ProductDTO, error) {
 		product, err := repo.GetByID(ctx, id)
 		if err != nil {

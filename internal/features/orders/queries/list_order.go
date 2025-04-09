@@ -6,7 +6,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/orders"
+	"github.com/quintans/vertical-slices/internal/features/orders/domain"
 )
 
 type ListItemOrderDTO struct {
@@ -43,7 +43,11 @@ func NewListOrdersController(handler ListOrdersHandler) (huma.Operation, func(ct
 		}
 }
 
-func NewListOrdersHandler(repo orders.Repository) ListOrdersHandler {
+type Lister interface {
+	ListAll(ctx context.Context) ([]*domain.Order, error)
+}
+
+func NewListOrdersHandler(repo Lister) ListOrdersHandler {
 	return func(ctx context.Context) ([]ListItemOrderDTO, error) {
 		orders, err := repo.ListAll(ctx)
 		if err != nil {

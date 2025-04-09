@@ -7,7 +7,6 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/orders"
 )
 
 type DeleteOrderCommand struct {
@@ -32,7 +31,11 @@ func NewDeleteOrderController(handler DeleteOrderHandler) (huma.Operation, func(
 		}
 }
 
-func NewDeleteOrderHandler(repo orders.Repository) DeleteOrderHandler {
+type Deleter interface {
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+func NewDeleteOrderHandler(repo Deleter) DeleteOrderHandler {
 	return func(ctx context.Context, id uuid.UUID) error {
 		err := repo.Delete(ctx, id)
 		if err != nil {

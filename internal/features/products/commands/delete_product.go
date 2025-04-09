@@ -7,7 +7,6 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/products"
 )
 
 type DeleteProductCommand struct {
@@ -31,7 +30,11 @@ func NewDeleteProductController(handler DeleteProductHandler) (huma.Operation, f
 		}
 }
 
-func NewDeleteProductHandler(repo products.Repository) DeleteProductHandler {
+type Deleter interface {
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+func NewDeleteProductHandler(repo Deleter) DeleteProductHandler {
 	return func(ctx context.Context, id uuid.UUID) error {
 		err := repo.Delete(ctx, id)
 		if err != nil {

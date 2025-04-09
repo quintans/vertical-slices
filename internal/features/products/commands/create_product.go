@@ -6,7 +6,6 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/features/products"
 	"github.com/quintans/vertical-slices/internal/features/products/domain"
 )
 
@@ -46,8 +45,12 @@ func NewCreateProductController(handler CreateProductHandler) (huma.Operation, f
 		}
 }
 
+type Creater interface {
+	Create(ctx context.Context, product *domain.Product) error
+}
+
 // NewCreateProductHandler creates a new CreateProductHandler.
-func NewCreateProductHandler(repo products.Repository) CreateProductHandler {
+func NewCreateProductHandler(repo Creater) CreateProductHandler {
 	return func(ctx context.Context, cmd *CreateProductCommand) (uuid.UUID, error) {
 		p := domain.NewProduct(cmd.SKU, cmd.Name, cmd.Price, 0)
 
