@@ -26,7 +26,7 @@ This showcases how to keep slices decoupled through **interfaces** and **domain 
 
 Although VSA encourages simplicity, this implementation maintains a clean internal structure by **separating technology concerns from the domain** and a dependency direction as stated by CA, within each slice. The general flow looks like:
 
-`controller → domain (commands/queries + entities) → gateway (persistence)`
+`controller → use case (commands/queries + aggregate) → gateway (persistence)`
 
 
 For individual use cases, the controller and its associated command/query may be placed in the same file for convenience and clarity.
