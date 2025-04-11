@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/quintans/vertical-slices/internal/lib/bus"
+	"github.com/quintans/vertical-slices/internal/lib/eventbus"
 	"github.com/quintans/vertical-slices/internal/shared/events"
 )
 
@@ -17,7 +17,7 @@ type Order struct {
 	productId uuid.UUID
 	quantity  int
 
-	events []bus.Message
+	events []eventbus.Message
 }
 
 type CreateOrderPolicy interface {
@@ -40,7 +40,7 @@ func NewOrder(ctx context.Context, productId uuid.UUID, quantity int, policy Cre
 		productId: productId,
 		quantity:  quantity,
 
-		events: []bus.Message{
+		events: []eventbus.Message{
 			events.OrderCreated{
 				ID:        id,
 				ProductID: productId,
@@ -62,7 +62,7 @@ func (p *Order) Quantity() int {
 	return p.quantity
 }
 
-func (p *Order) Events() []bus.Message {
+func (p *Order) Events() []eventbus.Message {
 	return p.events
 }
 

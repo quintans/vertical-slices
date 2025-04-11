@@ -28,7 +28,6 @@ Although VSA encourages simplicity, this implementation maintains a clean intern
 
 `controller → use case (commands/queries + aggregate) → gateway (persistence)`
 
-
 For individual use cases, the controller and its associated command/query may be placed in the same file for convenience and clarity.
 
 ### ✅ Testing & Repositories
