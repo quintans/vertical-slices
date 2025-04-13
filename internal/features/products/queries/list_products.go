@@ -22,10 +22,12 @@ type ListProductsResponse struct {
 	}
 }
 
-type ListProductsHandler func(ctx context.Context) ([]ListItemProductDTO, error)
+func RegisterListProductsController(api huma.API, repo Lister) {
+	handler := NewListProductsHandler(repo)
 
-func NewListProductsController(handler ListProductsHandler) (huma.Operation, func(ctx context.Context, _ *struct{}) (*ListProductsResponse, error)) {
-	return huma.Operation{
+	huma.Register(
+		api,
+		huma.Operation{
 			OperationID: "listProducts",
 			Method:      http.MethodGet,
 			Path:        "/products",
@@ -41,14 +43,15 @@ func NewListProductsController(handler ListProductsHandler) (huma.Operation, fun
 			r := &ListProductsResponse{}
 			r.Body.Products = products
 			return r, nil
-		}
+		},
+	)
 }
 
 type Lister interface {
 	ListAll(ctx context.Context) ([]*domain.Product, error)
 }
 
-func NewListProductsHandler(repo Lister) ListProductsHandler {
+func NewListProductsHandler(repo Lister) func(ctx context.Context) ([]ListItemProductDTO, error) {
 	return func(ctx context.Context) ([]ListItemProductDTO, error) {
 		products, err := repo.ListAll(ctx)
 		if err != nil {

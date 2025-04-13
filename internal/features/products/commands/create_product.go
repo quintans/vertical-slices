@@ -22,10 +22,12 @@ type CreateProductResponse struct {
 	}
 }
 
-type CreateProductHandler func(ctx context.Context, cmd *CreateProductCommand) (uuid.UUID, error)
+func RegisterCreateProductController(api huma.API, repo Creater) {
+	handler := NewCreateProductHandler(repo)
 
-func NewCreateProductController(handler CreateProductHandler) (huma.Operation, func(ctx context.Context, cmd *CreateProductCommand) (*CreateProductResponse, error)) {
-	return huma.Operation{
+	huma.Register(
+		api,
+		huma.Operation{
 			OperationID: "createProduct",
 			Method:      http.MethodPost,
 			Path:        "/products",
@@ -42,15 +44,15 @@ func NewCreateProductController(handler CreateProductHandler) (huma.Operation, f
 			r := &CreateProductResponse{}
 			r.Body.ID = id
 			return r, nil
-		}
+		},
+	)
 }
 
 type Creater interface {
 	Create(ctx context.Context, product *domain.Product) error
 }
 
-// NewCreateProductHandler creates a new CreateProductHandler.
-func NewCreateProductHandler(repo Creater) CreateProductHandler {
+func NewCreateProductHandler(repo Creater) func(ctx context.Context, cmd *CreateProductCommand) (uuid.UUID, error) {
 	return func(ctx context.Context, cmd *CreateProductCommand) (uuid.UUID, error) {
 		p := domain.NewProduct(cmd.SKU, cmd.Name, cmd.Price, 0)
 

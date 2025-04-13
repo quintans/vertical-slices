@@ -25,10 +25,12 @@ type GetOrderResponse struct {
 	}
 }
 
-type GetOrderHandler func(ctx context.Context, id uuid.UUID) (*OrderDTO, error)
+func RegisterGetOrderController(api huma.API, repo Getter) {
+	handler := NewGetOrderHandler(repo)
 
-func NewGetOrderController(handler GetOrderHandler) (huma.Operation, func(ctx context.Context, input *GetOrderRequest) (*GetOrderResponse, error)) {
-	return huma.Operation{
+	huma.Register(
+		api,
+		huma.Operation{
 			OperationID: "getOrder",
 			Method:      http.MethodGet,
 			Path:        "/orders/{id}",
@@ -44,14 +46,15 @@ func NewGetOrderController(handler GetOrderHandler) (huma.Operation, func(ctx co
 			r := &GetOrderResponse{}
 			r.Body.Order = *order
 			return r, nil
-		}
+		},
+	)
 }
 
 type Getter interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Order, error)
 }
 
-func NewGetOrderHandler(repo Getter) GetOrderHandler {
+func NewGetOrderHandler(repo Getter) func(ctx context.Context, id uuid.UUID) (*OrderDTO, error) {
 	return func(ctx context.Context, id uuid.UUID) (*OrderDTO, error) {
 		product, err := repo.GetByID(ctx, id)
 		if err != nil {

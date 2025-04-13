@@ -20,10 +20,12 @@ type CreateOrderResponse struct {
 	}
 }
 
-type CreateOrderHandler func(ctx context.Context, cmd *CreateOrderCommand) (uuid.UUID, error)
+func RegisterCreateOrderController(api huma.API, repo Creater, policy domain.CreateOrderPolicy) {
+	handler := NewCreateOrderHandler(repo, policy)
 
-func NewCreateOrderController(handler CreateOrderHandler) (huma.Operation, func(ctx context.Context, cmd *CreateOrderCommand) (*CreateOrderResponse, error)) {
-	return huma.Operation{
+	huma.Register(
+		api,
+		huma.Operation{
 			OperationID: "createOrder",
 			Method:      http.MethodPost,
 			Path:        "/orders",
@@ -40,14 +42,15 @@ func NewCreateOrderController(handler CreateOrderHandler) (huma.Operation, func(
 			r := &CreateOrderResponse{}
 			r.Body.ID = id
 			return r, nil
-		}
+		},
+	)
 }
 
 type Creater interface {
 	Create(ctx context.Context, product *domain.Order) error
 }
 
-func NewCreateOrderHandler(repo Creater, policy domain.CreateOrderPolicy) CreateOrderHandler {
+func NewCreateOrderHandler(repo Creater, policy domain.CreateOrderPolicy) func(ctx context.Context, cmd *CreateOrderCommand) (uuid.UUID, error) {
 	return func(ctx context.Context, cmd *CreateOrderCommand) (uuid.UUID, error) {
 		p, err := domain.NewOrder(ctx, cmd.ProductID, cmd.Quantity, policy)
 		if err != nil {

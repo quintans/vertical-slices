@@ -26,10 +26,12 @@ type GetProductResponse struct {
 	}
 }
 
-type GetProductHandler func(ctx context.Context, id uuid.UUID) (*ProductDTO, error)
+func RegisterGetProductController(api huma.API, repo Getter) {
+	handler := NewGetProductHandler(repo)
 
-func NewGetProductController(handler GetProductHandler) (huma.Operation, func(ctx context.Context, input *GetProductRequest) (*GetProductResponse, error)) {
-	return huma.Operation{
+	huma.Register(
+		api,
+		huma.Operation{
 			OperationID: "getProduct",
 			Method:      http.MethodGet,
 			Path:        "/products/{id}",
@@ -45,14 +47,15 @@ func NewGetProductController(handler GetProductHandler) (huma.Operation, func(ct
 			r := &GetProductResponse{}
 			r.Body.Product = *product
 			return r, nil
-		}
+		},
+	)
 }
 
 type Getter interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Product, error)
 }
 
-func NewGetProductHandler(repo Getter) GetProductHandler {
+func NewGetProductHandler(repo Getter) func(ctx context.Context, id uuid.UUID) (*ProductDTO, error) {
 	return func(ctx context.Context, id uuid.UUID) (*ProductDTO, error) {
 		product, err := repo.GetByID(ctx, id)
 		if err != nil {

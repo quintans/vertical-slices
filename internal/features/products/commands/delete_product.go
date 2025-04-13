@@ -13,10 +13,12 @@ type DeleteProductCommand struct {
 	ID uuid.UUID `path:"id" doc:"Product ID"`
 }
 
-type DeleteProductHandler func(ctx context.Context, id uuid.UUID) error
+func RegisterDeleteProductController(api huma.API, repo Deleter) {
+	handler := NewDeleteProductHandler(repo)
 
-func NewDeleteProductController(handler DeleteProductHandler) (huma.Operation, func(ctx context.Context, cmd *DeleteProductCommand) (*struct{}, error)) {
-	return huma.Operation{
+	huma.Register(
+		api,
+		huma.Operation{
 			OperationID: "deleteProduct",
 			Method:      http.MethodDelete,
 			Path:        "/products/{id}",
@@ -27,14 +29,15 @@ func NewDeleteProductController(handler DeleteProductHandler) (huma.Operation, f
 			err := handler(ctx, cmd.ID)
 
 			return nil, err
-		}
+		},
+	)
 }
 
 type Deleter interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
-func NewDeleteProductHandler(repo Deleter) DeleteProductHandler {
+func NewDeleteProductHandler(repo Deleter) func(ctx context.Context, id uuid.UUID) error {
 	return func(ctx context.Context, id uuid.UUID) error {
 		err := repo.Delete(ctx, id)
 		if err != nil {
